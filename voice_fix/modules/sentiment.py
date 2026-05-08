@@ -1,5 +1,10 @@
+import os
 import pandas as pd
 from transformers import pipeline
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+REVIEWS_PATH = os.path.join(BASE_DIR, "data", "reviews.csv")
+REVIEWS_LABELED_PATH = os.path.join(BASE_DIR, "data", "reviews_labeled.csv")
 
 def load_sentiment_model():
     return pipeline(
@@ -18,7 +23,7 @@ def run_sentiment_on_all():
     print("Loading BERT model... (first time takes 2 mins)")
     model = load_sentiment_model()
 
-    df = pd.read_csv('data/reviews.csv')
+    df = pd.read_csv(REVIEWS_PATH)
     print(f"Analyzing {len(df)} reviews...")
 
     labels, scores = [], []
@@ -35,14 +40,14 @@ def run_sentiment_on_all():
     df['sentiment'] = labels
     df['confidence'] = scores
 
-    df.to_csv('data/reviews_labeled.csv', index=False)
+    df.to_csv(REVIEWS_LABELED_PATH, index=False)
     print("Saved to reviews_labeled.csv")
 
     return df['sentiment'].value_counts()
 
 def get_sentiment_summary():
     try:
-        df = pd.read_csv('data/reviews_labeled.csv')
+        df = pd.read_csv(REVIEWS_LABELED_PATH)
         return df['sentiment'].value_counts()
     except:
         return run_sentiment_on_all()

@@ -1,17 +1,23 @@
 import pandas as pd
 import numpy as np
 import pickle
+import os
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import os
 
-MODEL_PATH = 'models/'
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+MODEL_PATH = os.path.join(BASE_DIR, "models")
+CUSTOMERS_PATH = os.path.join(DATA_DIR, "customers.xlsx")
+SALES_PATH = os.path.join(DATA_DIR, "sales.csv")
+CUSTOMER_MODEL_PATH = os.path.join(MODEL_PATH, "customer_model.pkl")
+ENCODERS_PATH = os.path.join(MODEL_PATH, "encoders.pkl")
 
 def train_and_save():
     os.makedirs(MODEL_PATH, exist_ok=True)
     
-    df_cust = pd.read_excel('data/customers.xlsx')
+    df_cust = pd.read_excel(CUSTOMERS_PATH)
     
     features = ['age', 'gender', 'location', 'occupation', 'total_transaction_amount', 
                 'total_transaction_count', 'login_days', 'support_tickets', 'discount_usage_count']
@@ -41,9 +47,9 @@ def train_and_save():
     
     acc = round(clf.score(X_test, y_test) * 100, 1)
     
-    with open(MODEL_PATH + 'customer_model.pkl', 'wb') as f:
+    with open(CUSTOMER_MODEL_PATH, 'wb') as f:
         pickle.dump(clf, f)
-    with open(MODEL_PATH + 'encoders.pkl', 'wb') as f:
+    with open(ENCODERS_PATH, 'wb') as f:
         pickle.dump({'gender': le_gender, 'location': le_loc, 'occupation': le_occ, 'target': le_target}, f)
     
     return acc
@@ -56,9 +62,9 @@ def get_accuracy():
 
 def predict_single_customer(age, gender, location, occupation, total_spent, num_transactions, login_days):
     try:
-        with open(MODEL_PATH + 'customer_model.pkl', 'rb') as f:
+        with open(CUSTOMER_MODEL_PATH, 'rb') as f:
             clf = pickle.load(f)
-        with open(MODEL_PATH + 'encoders.pkl', 'rb') as f:
+        with open(ENCODERS_PATH, 'rb') as f:
             encoders = pickle.load(f)
         
         gender_enc = encoders['gender'].transform([gender])[0]
@@ -74,23 +80,23 @@ def predict_single_customer(age, gender, location, occupation, total_spent, num_
         return "SILVER"
 
 def get_customer_distribution():
-    df = pd.read_excel('data/customers.xlsx')
+    df = pd.read_excel(CUSTOMERS_PATH)
     dist = df['Customer_value'].value_counts().reset_index()
     dist.columns = ['Customer Value', 'Count']
     return dist
 
 def get_location_analysis():
-    df = pd.read_excel('data/customers.xlsx')
+    df = pd.read_excel(CUSTOMERS_PATH)
     loc = df.groupby('location')['total_transaction_amount'].mean().reset_index()
     loc.columns = ['location', 'avg_transaction']
     return loc
 
 def get_top_customers():
-    df = pd.read_excel('data/customers.xlsx')
+    df = pd.read_excel(CUSTOMERS_PATH)
     return df.nlargest(5, 'total_transaction_amount')[['name', 'location', 'total_transaction_amount', 'Customer_value']]
 
 def get_occupation_analysis():
-    df = pd.read_excel('data/customers.xlsx')
+    df = pd.read_excel(CUSTOMERS_PATH)
     occ = df.groupby('occupation')['Customer_value'].apply(
         lambda x: (x == 'GOLD').sum() / len(x) * 100
     ).reset_index()
@@ -98,11 +104,11 @@ def get_occupation_analysis():
     return occ
 
 def get_subscription_analysis():
-    df = pd.read_excel('data/customers.xlsx')
+    df = pd.read_excel(CUSTOMERS_PATH)
     return df['Subscription_Type'].value_counts().reset_index()
 
 def get_predictions():
-    df = pd.read_csv('data/sales.csv')
+    df = pd.read_csv(SALES_PATH)
     if 'Category' not in df.columns or 'Sales' not in df.columns:
         categories = ['Electronics', 'Clothing', 'Food', 'Home', 'Sports', 'Books', 'Toys', 'Beauty']
         sales = [15000, 12000, 18000, 9000, 7000, 5000, 8000, 11000]
@@ -113,7 +119,7 @@ def get_predictions():
     return df[['Category', 'Demand Score']]
 
 def get_predictions_train():
-    df_sales = pd.read_csv('data/sales.csv')
+    df_sales = pd.read_csv(SALES_PATH)
     
     if 'Category' not in df_sales.columns or 'Sales' not in df_sales.columns:
         return get_predictions()

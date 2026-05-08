@@ -19,6 +19,10 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import streamlit.components.v1 as components
+
+BASE_DIR = os.path.dirname(__file__)
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
 sys.path.append(os.path.dirname(__file__))
 
 from modules.chatbot    import chatbot_response
@@ -76,10 +80,10 @@ st.markdown("""
 # ─────────────────────────────────────────────────────────────────────────────
 if "data_paths" not in st.session_state:
     st.session_state.data_paths = {
-        "products":  "data/products.csv",
-        "customers": "data/customers.xlsx",
-        "sales":     "data/sales.csv",
-        "reviews":   "data/reviews.csv",
+        "products":  os.path.join(DATA_DIR, "products.csv"),
+        "customers": os.path.join(DATA_DIR, "customers.xlsx"),
+        "sales":     os.path.join(DATA_DIR, "sales.csv"),
+        "reviews":   os.path.join(DATA_DIR, "reviews.csv"),
     }
 
 def get_products():   return pd.read_csv(st.session_state.data_paths["products"])
@@ -668,7 +672,7 @@ elif page == " Upload Data":
     st.caption("Required columns: Category, Price (Rs.), Discount (%), Final_Price(Rs.), Payment_Method")
     prod_file = st.file_uploader("Upload products CSV", type=["csv"], key="prod")
     if prod_file:
-        save_path = "data/uploaded_products.csv"
+        save_path = os.path.join(DATA_DIR, "uploaded_products.csv")
         with open(save_path, "wb") as f:
             f.write(prod_file.getbuffer())
         st.session_state.data_paths["products"] = save_path
@@ -682,7 +686,7 @@ elif page == " Upload Data":
     st.caption("Required columns: name, age, gender, location, occupation, total_transaction_amount, total_transaction_count, login_days, Customer_value")
     cust_file = st.file_uploader("Upload customers Excel", type=["xlsx", "xls"], key="cust")
     if cust_file:
-        save_path = "data/uploaded_customers.xlsx"
+        save_path = os.path.join(DATA_DIR, "uploaded_customers.xlsx")
         with open(save_path, "wb") as f:
             f.write(cust_file.getbuffer())
         st.session_state.data_paths["customers"] = save_path
@@ -696,7 +700,7 @@ elif page == " Upload Data":
     st.caption("Required columns: Category, Sales")
     sales_file = st.file_uploader("Upload sales CSV", type=["csv"], key="sales")
     if sales_file:
-        save_path = "data/uploaded_sales.csv"
+        save_path = os.path.join(DATA_DIR, "uploaded_sales.csv")
         with open(save_path, "wb") as f:
             f.write(sales_file.getbuffer())
         st.session_state.data_paths["sales"] = save_path

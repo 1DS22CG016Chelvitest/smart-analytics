@@ -1,11 +1,10 @@
 import json
+import os
 import re
 from fuzzywuzzy import fuzz
 import pandas as pd
 
 # ── Load FAQ ────────────────────────────────────────────────────
-import os
-
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 json_path = os.path.join(BASE_DIR, "data", "chatbot.json")
@@ -23,7 +22,8 @@ if isinstance(raw, dict) and 'questions' in raw:
 print(f"FAQ loaded: {len(faq_pairs)} pairs")
 
 # ── Load Products ───────────────────────────────────────────────
-df = pd.read_csv('data/products.csv')
+products_path = os.path.join(BASE_DIR, "data", "products.csv")
+df = pd.read_csv(products_path)
 
 CAT_COL   = 'Category'
 PRICE_COL = 'Price (Rs.)'
