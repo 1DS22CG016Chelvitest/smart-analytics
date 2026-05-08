@@ -4,7 +4,13 @@ from fuzzywuzzy import fuzz
 import pandas as pd
 
 # ── Load FAQ ────────────────────────────────────────────────────
-with open('data/chatbot.json', 'r', encoding='utf-8') as f:
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+json_path = os.path.join(BASE_DIR, "data", "chatbot.json")
+
+with open(json_path, 'r', encoding='utf-8') as f:
     raw = json.load(f)
 
 faq_pairs = []
